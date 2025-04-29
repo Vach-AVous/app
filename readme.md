@@ -56,45 +56,7 @@ Ce projet a été construit en utilisant des technologies web fondamentales (HTM
     *   Aucun outil de build (Webpack, Vite, etc.) n'est utilisé dans cette version.
     *   Aucun framework JS (React, Vue, Angular) n'est utilisé.
 
-## 4. Structure du Projet
-
-ferme-connectee/
-├── index.html # Page d'accueil / Boutique
-├── about.html # Page "À Propos" / "Notre Histoire" avec le quiz
-├── style.css # Feuille de style principale (pour tout le site + jeu)
-├── script.js # Script principal (produits, panier, formulaire, popup commande)
-├── about.js # Script pour la page "À Propos" (quiz, classement, graphiques, révision)
-├── popups.js # Script pour les popups d'information aléatoires
-├── music.js # Script pour le contrôle de la musique de fond du site
-├── babylone.mp3 # Fichier audio pour la musique de fond du site
-│
-├── image/ # Dossier pour les images du site principal
-│ ├── logoRond.png # Favicon / Logo utilisé dans le <head>
-│ ├── lait.png # Image produit lait
-│ ├── oeuf.png # Image produit oeufs
-│ ├── chevre.png # Image produit fromage
-│ ├── legume.png # Image produit panier légumes
-│ │
-│ └── vache/ # Sous-dossier pour les images des vaches
-│ ├── vache1.png # Image Marguerite
-│ ├── vache2.png # Image Blanchette
-│ ├── vache3.png # Image Belle
-│ ├── vache4.png # Image Flocon
-│ ├── vache5.png # Image Rosie
-│ └── lolo.png # Image Lola
-│
-└── game/ # Dossier pour le jeu
-├── jeu.html # Fichier HTML du jeu
-│
-└── lib/ # Sous-dossier pour les ressources du jeu
-├── farm-background.jpeg # Image de fond du jeu
-├── camion.png # Image du joueur (camion)
-├── bottle.png # Image de l'objet à collecter (bouteille)
-├── Dulait.mp3 # Musique de fond du jeu
-├── collect.mp3 # Effet sonore collecte
-└── miss.mp3 # Effet sonore bouteille ratée
-
-## 5. Installation et Lancement
+## 4. Installation et Lancement
 
 Ce projet est entièrement **côté client** et ne nécessite pas de serveur backend pour fonctionner (dans son état actuel de simulation).
 
@@ -103,7 +65,7 @@ Ce projet est entièrement **côté client** et ne nécessite pas de serveur bac
 3.  **Remplacer les Images/Sons :** **Crucial :** Les chemins vers les images et les sons sont présents dans le code (`script.js`, `style.css`, `jeu.html`), mais les fichiers multimédias réels doivent être fournis par l'utilisateur et placés aux emplacements corrects avec les noms correspondants. Sans cela, le site affichera des images cassées.
 4.  **Ouvrir dans le Navigateur :** Ouvrez le fichier `index.html` directement dans votre navigateur web (Firefox, Chrome, Edge, Safari...).
 
-## 6. Utilisation
+## 5. Utilisation
 
 *   **Navigation :** Utilisez la barre de navigation en haut pour passer entre la Boutique (`index.html`), l'Histoire/Quiz (`about.html`), et le Jeu (`game/jeu.html`). Le lien Panier fait défiler jusqu'à la section panier sur la page d'accueil.
 *   **Boutique :** Cliquez sur "Ajouter au Panier" ou "Adopter [Nom]" pour ajouter des articles/parrainages.
@@ -114,7 +76,7 @@ Ce projet est entièrement **côté client** et ne nécessite pas de serveur bac
 *   **Musique (Site) :** Cliquez sur le bouton "♪ Musique" / "❚❚ Stop" dans le header pour lancer ou arrêter la musique de fond du site.
 *   **Popups Info :** Des popups avec des informations sur l'agriculture locale peuvent apparaître aléatoirement. Cliquez sur "Bien noté !" ou en dehors de la popup pour les fermer.
 
-## 7. Points Techniques Clés
+## 6. Points Techniques Clés
 
 *   **Gestion du DOM (JavaScript Natif) :**
     *   `script.js` utilise `document.querySelector`, `document.getElementById`, `createElement`, `appendChild`, `innerHTML` pour afficher dynamiquement les produits, les vaches, mettre à jour le panier et manipuler l'affichage du formulaire et des popups.
@@ -134,7 +96,7 @@ Ce projet est entièrement **côté client** et ne nécessite pas de serveur bac
 *   **Popups Aléatoires (`popups.js`) :** Utilise `setTimeout` avec un délai calculé via `Math.random()` pour déclencher l'affichage (`popupOverlay.classList.add('popup-visible')`). Un nouveau timeout est programmé à chaque fermeture.
 *   **CSS :** Utilisation de variables CSS (`:root`) pour gérer le thème, Flexbox et Grid pour la mise en page, transitions et animations simples pour les effets visuels (survol boutons, apparition popups), pseudo-éléments (`#hero::before`) pour l'effet de flou.
 
-## 8. Limitations Actuelles
+## 7. Limitations Actuelles
 
 *   **Simulation Uniquement :** Le projet est une démonstration front-end. Il n'y a pas de backend pour gérer les utilisateurs, les commandes réelles, les paiements, la persistance des données (panier, scores), ou la logique métier complexe (gestion stock, abonnements vache).
 *   **Sécurité :** Aucune mesure de sécurité côté serveur. La validation des entrées est minimale côté client.
@@ -144,7 +106,7 @@ Ce projet est entièrement **côté client** et ne nécessite pas de serveur bac
 *   **Dépendance aux Médias :** Le rendu visuel final dépend fortement de la fourniture par l'utilisateur d'images et de sons de qualité aux emplacements spécifiés.
 *   **Compatibilité Navigateurs :** Développé et testé implicitement sur un navigateur moderne. Des tests et ajustements pourraient être nécessaires pour une compatibilité étendue.
 
-## 9. Pistes d'Améliorations Futures
+## 8. Pistes d'Améliorations Futures
 
 *   **Intégration Backend :** Développer un serveur (Node.js/Express, Python/Flask/Django, PHP/Laravel, etc.) pour gérer :
     *   Base de données (produits, utilisateurs, commandes, parrainages).
