@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const customerInfoForm = document.getElementById('customer-info-form');
     const confirmOrderBtn = document.getElementById('confirm-order-btn');
 
+    const orderConfirmOverlay = document.getElementById('order-confirm-overlay');
+    const confirmMessage = document.getElementById('confirm-message');
+    const closeConfirmPopupBtn = document.getElementById('close-confirm-popup-btn');
+
     let cart = [];
 
     const products = [
@@ -28,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     function renderProducts() {
+        if (!productList) return;
         productList.innerHTML = '';
         products.forEach(product => {
             const card = document.createElement('div');
@@ -43,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCows() {
+        if (!cowList) return;
         cowList.innerHTML = '';
         cows.forEach(cow => {
             const card = document.createElement('div');
@@ -87,12 +93,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateCart() {
+        if (!cartItemsList || !cartTotalAmount || !cartCount || !checkoutBtn) return;
+
         cartItemsList.innerHTML = '';
         let total = 0;
 
         if (cart.length === 0) {
             cartItemsList.innerHTML = '<li class="empty-cart">Votre panier est encore vide.</li>';
-            checkoutFormDiv.style.display = 'none';
+            if (checkoutFormDiv) checkoutFormDiv.style.display = 'none';
             checkoutBtn.style.display = 'block';
         } else {
             cart.forEach(item => {
@@ -106,9 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 cartItemsList.appendChild(li);
                 total += itemTotal;
             });
-             if (checkoutFormDiv.style.display === 'none') {
+             if (checkoutFormDiv && checkoutFormDiv.style.display === 'none') {
                  checkoutBtn.style.display = 'block';
-             } else {
+             } else if (checkoutFormDiv) {
                   checkoutBtn.style.display = 'none';
              }
         }
@@ -118,56 +126,112 @@ document.addEventListener('DOMContentLoaded', () => {
         checkoutBtn.disabled = cart.length === 0;
     }
 
-    productList.addEventListener('click', (e) => {
-        if (e.target.classList.contains('add-to-cart-btn')) {
-            const { id, name, price, type } = e.target.dataset;
-            addToCart(id, name, parseFloat(price), type);
-        }
-    });
+    if (productList) {
+        productList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('add-to-cart-btn')) {
+                const { id, name, price, type } = e.target.dataset;
+                if(id && name && price && type) {
+                    addToCart(id, name, parseFloat(price), type);
+                }
+            }
+        });
+    }
 
-    cowList.addEventListener('click', (e) => {
-        if (e.target.classList.contains('rent-cow-btn')) {
-            const { id, name, price, type } = e.target.dataset;
-            addToCart(id, name, parseFloat(price), type);
-        }
-    });
+    if (cowList) {
+        cowList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('rent-cow-btn')) {
+                const { id, name, price, type } = e.target.dataset;
+                 if(id && name && price && type) {
+                    addToCart(id, name, parseFloat(price), type);
+                 }
+            }
+        });
+    }
 
-     cartItemsList.addEventListener('click', (e) => {
-        if (e.target.classList.contains('remove-from-cart-btn')) {
-            const { id, type } = e.target.dataset;
-            removeFromCart(id, type);
-        }
-    });
+    if (cartItemsList) {
+         cartItemsList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-from-cart-btn')) {
+                const { id, type } = e.target.dataset;
+                 if(id && type) {
+                    removeFromCart(id, type);
+                 }
+            }
+        });
+    }
 
-    checkoutBtn.addEventListener('click', () => {
-        if (cart.length > 0) {
-            checkoutFormDiv.style.display = 'block';
-            checkoutBtn.style.display = 'none';
-            checkoutFormDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    });
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.length > 0 && checkoutFormDiv) {
+                checkoutFormDiv.style.display = 'block';
+                checkoutBtn.style.display = 'none';
+                checkoutFormDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
 
-    customerInfoForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const firstName = document.getElementById('firstname').value;
-        const lastName = document.getElementById('lastname').value;
-        const address = document.getElementById('address').value;
-        const phone = document.getElementById('phone').value;
-        const phoneRegex = /^(?:(?:\+|00)33[\s.-]{0,3}(?:\(0\)[\s.-]{0,3})?|0)[1-9](?:(?:[\s.-]?\d{2}){4}|\d{2}(?:[\s.-]?\d{3}){2})$/;
+    if (customerInfoForm) {
+        customerInfoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const firstNameElement = document.getElementById('firstname');
+            const lastNameElement = document.getElementById('lastname');
+            const addressElement = document.getElementById('address');
+            const phoneElement = document.getElementById('phone');
 
-        if (!firstName || !lastName || !address || !phone) {
-            alert('Veuillez remplir tous les champs, s\'il vous plaît.'); return;
-        }
-        if (!phoneRegex.test(phone)) {
-            alert('Le format du numéro de téléphone n\'est pas valide.'); document.getElementById('phone').focus(); return;
-        }
+            const firstName = firstNameElement ? firstNameElement.value : '';
+            const lastName = lastNameElement ? lastNameElement.value : '';
+            const address = addressElement ? addressElement.value : '';
+            const phone = phoneElement ? phoneElement.value : '';
 
-        alert(`Merci beaucoup ${firstName} !\nVotre commande (simulée) de ${cartTotalAmount.textContent} € est bien enregistrée.\nLivraison prévue à : ${address}\nNous vous contacterons au ${phone} si besoin.\n\n(Ceci est une simulation.)`);
-        cart = [];
-        customerInfoForm.reset();
-        updateCart();
-        document.getElementById('cart').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+            const phoneRegex = /^(?:(?:\+|00)33[\s.-]{0,3}(?:\(0\)[\s.-]{0,3})?|0)[1-9](?:(?:[\s.-]?\d{2}){4}|\d{2}(?:[\s.-]?\d{3}){2})$/;
+
+            if (!firstName || !lastName || !address || !phone) {
+                alert('Veuillez remplir tous les champs, s\'il vous plaît.'); return;
+            }
+            if (!phoneRegex.test(phone)) {
+                alert('Le format du numéro de téléphone n\'est pas valide.');
+                if(phoneElement) phoneElement.focus();
+                return;
+            }
+
+            if (confirmMessage && orderConfirmOverlay) {
+                const totalAmountText = cartTotalAmount ? cartTotalAmount.textContent : 'N/A';
+                confirmMessage.innerHTML = `
+                    Un grand merci, ${firstName} ${lastName} !<br>
+                    Votre commande (simulée) de <strong>${totalAmountText} €</strong> a bien été enregistrée.<br><br>
+                    La livraison est prévue à l'adresse suivante :<br><em>${address}</em><br><br>
+                    Nous vous contacterons au ${phone} si nécessaire.<br>
+                    <small>(Ceci est une simulation, aucun paiement n'a été effectué.)</small>
+                `;
+                orderConfirmOverlay.classList.add('popup-visible');
+            } else {
+                alert(`Merci beaucoup ${firstName} !\nVotre commande (simulée) de ${cartTotalAmount ? cartTotalAmount.textContent : 'N/A'} € est bien enregistrée.\nLivraison prévue à : ${address}\nNous vous contacterons au ${phone} si besoin.\n\n(Ceci est une simulation.)`);
+                cart = [];
+                customerInfoForm.reset();
+                updateCart();
+                const cartSection = document.getElementById('cart');
+                if (cartSection) cartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
+    if (closeConfirmPopupBtn && orderConfirmOverlay) {
+        closeConfirmPopupBtn.addEventListener('click', () => {
+            orderConfirmOverlay.classList.remove('popup-visible');
+            cart = [];
+            if (customerInfoForm) customerInfoForm.reset();
+            updateCart();
+            const cartSection = document.getElementById('cart');
+            if (cartSection) cartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+     if (orderConfirmOverlay) {
+         orderConfirmOverlay.addEventListener('click', (event) => {
+             if (event.target === orderConfirmOverlay && closeConfirmPopupBtn) {
+                 closeConfirmPopupBtn.click();
+             }
+         });
+     }
 
     renderProducts();
     renderCows();

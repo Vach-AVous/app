@@ -1,65 +1,82 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Music.js: DOM chargé."); // Log 1: Vérifie que le script commence
+
     const music = document.getElementById('background-music');
     const toggleBtn = document.getElementById('toggle-music-btn');
 
+    // Vérifications initiales avec logs
     if (!music) {
         console.error("Erreur music.js : Élément audio #background-music introuvable.");
-        if(toggleBtn) toggleBtn.disabled = true; // Désactiver bouton si pas d'audio
+        if(toggleBtn) toggleBtn.disabled = true;
         return;
+    } else {
+        console.log("Music.js: Élément audio trouvé:", music); // Log 2: Confirme que l'élément audio est trouvé
     }
+
     if (!toggleBtn) {
         console.error("Erreur music.js : Bouton #toggle-music-btn introuvable.");
         return;
+    } else {
+        console.log("Music.js: Bouton trouvé:", toggleBtn); // Log 3: Confirme que le bouton est trouvé
     }
 
-    let isPlaying = false; // État initial : la musique ne joue pas
+    let isPlaying = false; // État logique interne
 
-    // Texte initial du bouton
     toggleBtn.textContent = '♪ Musique';
+    console.log("Music.js: État initial -> isPlaying:", isPlaying, "| Texte bouton:", toggleBtn.textContent); // Log 4: État initial
 
     // --- Gestion du clic sur le bouton ---
     toggleBtn.addEventListener('click', () => {
-        if (isPlaying) {
-            // Si la musique joue -> on met en pause
+        console.log("Music.js: Bouton cliqué ! État actuel de music.paused:", music.paused); // Log 5: Clic détecté
+
+        // Baser la décision sur l'état réel de l'élément audio
+        if (!music.paused) {
+            console.log("Music.js: Musique jouait -> Appel de music.pause()"); // Log 6a: Tentative de pause
             music.pause();
-            // L'état et le texte seront mis à jour par l'événement 'onpause'
         } else {
-            // Si la musique est en pause -> on lance la lecture
+            console.log("Music.js: Musique en pause -> Appel de music.play()"); // Log 6b: Tentative de lecture
             music.play().catch(error => {
-                // Gérer les erreurs si la lecture échoue même après un clic
-                console.error("Erreur lors de la tentative de lecture : ", error);
-                alert("Impossible de lancer la musique. Vérifiez les permissions de votre navigateur ou le fichier audio.");
-                // Assurer que l'état reste cohérent en cas d'échec
+                console.error("Music.js: Erreur lors de music.play() :", error.name, error.message, error); // Log 7: Erreur de lecture
+                alert(`Impossible de lancer la musique: ${error.message}. Vérifiez les permissions ou le fichier audio.`);
+                // Assurer la cohérence de l'état en cas d'échec
                 isPlaying = false;
                 toggleBtn.textContent = '♪ Musique';
             });
-            // L'état et le texte seront mis à jour par l'événement 'onplay' en cas de succès
         }
     });
 
-    // --- Mise à jour de l'état et du bouton basée sur les événements audio réels ---
+    // --- Mise à jour basée sur les événements audio réels ---
     music.onplay = () => {
+        console.log("Music.js: Événement 'onplay' reçu."); // Log 8: Lecture démarrée
         isPlaying = true;
-        toggleBtn.textContent = '❚❚ Stop'; // Ou une autre icône/texte pour pause
+        toggleBtn.textContent = '❚❚ Stop';
     };
 
     music.onpause = () => {
+        console.log("Music.js: Événement 'onpause' reçu."); // Log 9: Pause effectuée
         isPlaying = false;
         toggleBtn.textContent = '♪ Musique';
     };
 
-    // Optionnel : Gestion si le fichier audio n'est pas trouvé ou corrompu
+    music.onended = () => {
+        console.log("Music.js: Événement 'onended' reçu."); // Log 10: Fin de la piste (si loop ne marche pas)
+        isPlaying = false;
+        toggleBtn.textContent = '♪ Musique';
+    };
+
+    // Gestion erreur chargement média
     music.onerror = (e) => {
-         console.error("Erreur de l'élément audio :", music.error);
-         alert("Erreur lors du chargement de la musique.");
+         console.error("Music.js: Erreur de l'élément audio :", music.error, e); // Log 11: Erreur chargement audio
+         alert("Erreur lors du chargement de la musique. Vérifiez le fichier et son chemin.");
          toggleBtn.textContent = 'Erreur';
          toggleBtn.disabled = true;
      };
      const sourceElement = music.querySelector('source');
      if (sourceElement) {
          sourceElement.onerror = (e) => {
-              console.error("Erreur de la source audio:", sourceElement.src, e);
-              // L'erreur principale de l'élément audio devrait déjà se déclencher
+              console.error("Music.js: Erreur de la source audio:", sourceElement.src, e); // Log 12: Erreur chargement source
          }
+     } else {
+         console.warn("Music.js: Aucun élément <source> trouvé dans l'élément <audio>."); // Log 13: Avertissement si pas de source
      }
 });

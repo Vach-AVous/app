@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeu - La Ferme Connectée</title>
+    <title>Collecte de Lait - La Ferme Connectée</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
-    <link rel="icon" type="image/png" href="../images/logo_ferme.png">
+    <link rel="icon" type="image/png" href="../image/logoRond.png">
 </head>
 <body class="game-page-body">
 
@@ -31,15 +31,19 @@
             <div class="game-info-header">
                 <div class="score">Score: 0</div>
                 <div class="bottles">Bouteilles: 0</div>
+                <div class="lives">Vies: ♥ ♥ ♥</div>
             </div>
             <div id="gameContainer" class="game-container">
+                <div class="game-overlay">
+                    <button id="start-game-btn" class="cta-button game-start-btn">Commencer la Collecte</button>
+                </div>
             </div>
         </div>
 
         <aside class="rewards-sidebar">
             <h2>Récompenses</h2>
             <ul class="rewards-list">
-                <li>10000 pts : Bon de 5€</li>
+                <li>100 pts : Bon de 5€ (Simulation)</li>
                 <li>20000 pts : Bon de 10€</li>
                 <li>50000 pts : Bon de 25€</li>
                 <li>100000 pts : Bon de 50€</li>
@@ -48,40 +52,122 @@
                 <label for="volume">Volume Jeu :</label>
                 <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
             </div>
-             <p class="game-instructions">Utilisez les flèches ← et → pour déplacer le camion et récupérer les bouteilles !</p>
+             <p class="game-instructions">Utilisez les flèches ← et → pour déplacer le camion et récupérer les bouteilles de lait (🍼) ! Attention à ne pas en laisser tomber.</p>
         </aside>
 
     </main>
 
     <div id="notification" class="game-notification"></div>
 
-    <audio id="backgroundAudio" src="lib/Dulait.mp3" loop></audio>
+    <div id="game-over-overlay">
+        <div id="game-over-popup">
+            <h3 id="game-over-title">Partie Terminée</h3>
+            <p id="game-over-message">Message de fin...</p>
+            <p>Score Final: <span id="final-score">0</span></p>
+            <p>Bouteilles Collectées: <span id="final-bottles">0</span></p>
+            <button id="restart-game-btn" class="cta-button">Rejouer</button>
+        </div>
+    </div>
+
+    <audio id="backgroundAudio" loop>
+        <source src="lib/Dulait.mp3" type="audio/mpeg">
+        <!-- Assurez-vous que le fichier lib/Dulait.mp3 existe -->
+        Votre navigateur ne supporte pas l'audio.
+    </audio>
+    <audio id="collectSound">
+        <source src="lib/collect.mp3" type="audio/mpeg">
+        <!-- Assurez-vous que le fichier lib/collect.mp3 existe -->
+    </audio>
+    <audio id="missSound">
+        <source src="lib/miss.mp3" type="audio/mpeg">
+        <!-- Assurez-vous que le fichier lib/miss.mp3 existe -->
+    </audio>
+
 
     <script>
       document.addEventListener('DOMContentLoaded', () => {
           const gameContainer = document.getElementById("gameContainer");
           const scoreDisplay = document.querySelector(".score");
           const bottlesDisplay = document.querySelector(".bottles");
+          const livesDisplay = document.querySelector(".lives");
           const notification = document.getElementById("notification");
           const volumeControl = document.getElementById("volume");
           const backgroundAudio = document.getElementById("backgroundAudio");
+          const collectSound = document.getElementById("collectSound");
+          const missSound = document.getElementById("missSound");
+          const startGameBtn = document.getElementById("start-game-btn");
+          const gameOverOverlay = document.getElementById("game-over-overlay");
+          const gameOverPopup = document.getElementById("game-over-popup");
+          const gameOverTitle = document.getElementById("game-over-title");
+          const gameOverMessage = document.getElementById("game-over-message");
+          const finalScoreDisplay = document.getElementById("final-score");
+          const finalBottlesDisplay = document.getElementById("final-bottles");
+          const restartGameBtn = document.getElementById("restart-game-btn");
+          const gameOverlay = document.querySelector(".game-overlay");
+
           const rows = 6;
           const cols = 3;
+          const initialLives = 3;
+          const baseGameSpeed = 950;
+          const minGameSpeed = 350;
+          const speedIncrement = 40;
+          const speedIncreaseInterval = 12000;
+          const initialSpawnRate = 0.40;
+          const maxSpawnRate = 0.70;
+          const spawnRateIncrement = 0.03;
+
           let playerPosition = 1;
           let score = 0;
           let bottlesCollected = 0;
+          let lives = initialLives;
           let gameInterval = null;
           let gameRunning = false;
+          let currentGameSpeed = baseGameSpeed;
+          let currentSpawnRate = initialSpawnRate;
+          let lastSpeedIncrease = 0;
+          let shownRewards = new Set();
 
           const rewards = [
-            { points: 10000, message: "Bravo ! Bon de 5€ gagné !" },
+            { points: 100, message: "Bravo ! Bon de 5€ gagné (simulation) !" },
             { points: 20000, message: "Super ! Bon de 10€ gagné !" },
             { points: 50000, message: "Incroyable ! Bon de 25€ gagné !" },
             { points: 100000, message: "Félicitations ! Bon de 50€ gagné !" },
           ];
 
+          function initGame() {
+              score = 0;
+              bottlesCollected = 0;
+              lives = initialLives;
+              playerPosition = 1;
+              gameRunning = false;
+              currentGameSpeed = baseGameSpeed;
+              currentSpawnRate = initialSpawnRate;
+              shownRewards.clear();
+              if (gameInterval) clearInterval(gameInterval);
+              gameInterval = null;
+              lastSpeedIncrease = 0;
+              scoreDisplay.textContent = `Score: 0`;
+              bottlesDisplay.textContent = `Bouteilles: 0`;
+              updateLivesDisplay();
+              createGrid();
+              if (notification) notification.style.display = "none";
+              if (gameOverOverlay) gameOverOverlay.classList.remove('popup-visible');
+              if (gameOverlay) gameOverlay.style.display = 'flex';
+              if (gameContainer) gameContainer.classList.remove('playing');
+              if (backgroundAudio) {
+                  backgroundAudio.pause();
+                  backgroundAudio.currentTime = 0;
+              }
+              // Appliquer le volume initial aux sons
+              applyVolume();
+          }
+
           function createGrid() {
-            gameContainer.innerHTML = '';
+            if (!gameContainer) return;
+            const existingOverlay = gameContainer.querySelector('.game-overlay');
+            gameContainer.innerHTML = ''; // Vider complètement
+            if (existingOverlay) gameContainer.appendChild(existingOverlay); // Remettre l'overlay
+
             gameContainer.style.setProperty('--grid-rows', rows);
             gameContainer.style.setProperty('--grid-cols', cols);
             for (let i = 0; i < rows * cols; i++) {
@@ -90,19 +176,11 @@
               gameContainer.appendChild(cell);
             }
             updatePlayerPosition();
-            // Essayer de lancer la musique (peut être bloqué par le navigateur)
-            if (backgroundAudio) {
-                backgroundAudio.volume = parseFloat(volumeControl.value); // Appliquer volume initial
-                backgroundAudio.play().catch(e => console.warn("Lecture audio auto bloquée par le navigateur."));
-            }
-             if (!gameRunning) {
-                 startGameLoop();
-                 gameRunning = true;
-             }
           }
 
           function updatePlayerPosition() {
-            const cells = document.querySelectorAll(".cell");
+            if (!gameContainer) return;
+            const cells = gameContainer.querySelectorAll(".cell");
             cells.forEach((cell) => {
               const player = cell.querySelector(".player");
               if (player) player.remove();
@@ -111,14 +189,17 @@
                  const playerCellIndex = (rows - 1) * cols + playerPosition;
                  if(playerCellIndex >= 0 && playerCellIndex < cells.length) {
                      const playerCell = cells[playerCellIndex];
-                     const playerDiv = document.createElement("div");
-                     playerDiv.classList.add("player");
-                     playerCell.appendChild(playerDiv);
+                     if (playerCell) {
+                        const playerDiv = document.createElement("div");
+                        playerDiv.classList.add("player");
+                        playerCell.appendChild(playerDiv);
+                     }
                  }
             }
           }
 
           function movePlayer(direction) {
+             if (!gameRunning) return;
              if (direction === "left" && playerPosition > 0) {
                  playerPosition--;
              } else if (direction === "right" && playerPosition < cols - 1) {
@@ -135,67 +216,107 @@
             }
           });
 
-          function dropEnemies() {
-             if(!gameRunning) return;
-            const cells = document.querySelectorAll(".cell");
-            let gameOver = false;
-
-            for (let i = rows * cols - 1; i >= 0; i--) {
-              const currentCell = cells[i];
-              const enemy = currentCell.querySelector(".enemy");
-
-              if (enemy) {
-                  const targetIndex = i + cols;
-                  enemy.remove();
-
-                  if (targetIndex < rows * cols) {
-                       const targetCell = cells[targetIndex];
-                       if (targetIndex >= (rows - 1) * cols && (targetIndex % cols === playerPosition)) {
-                             score += 10;
-                             bottlesCollected++;
-                             scoreDisplay.textContent = `Score: ${score}`;
-                             bottlesDisplay.textContent = `Bouteilles: ${bottlesCollected}`;
-                             checkRewards();
-                       } else {
-                            targetCell.appendChild(enemy);
-                       }
-                  } else {
-                       gameOver = true;
-                       break;
-                  }
+          function updateLivesDisplay() {
+              if (!livesDisplay) return;
+              let hearts = '';
+              for (let i = 0; i < initialLives; i++) {
+                  hearts += (i < lives) ? '♥ ' : '♡ ';
               }
-            }
+              livesDisplay.textContent = `Vies: ${hearts.trim()}`;
+          }
 
-            if (gameOver) {
-                 endGame("Perdu ! Une bouteille a touché le sol.");
-                 return;
-            }
+          function applyVolume() {
+             if (!volumeControl) return;
+             const volumeValue = parseFloat(volumeControl.value);
+             if (backgroundAudio) backgroundAudio.volume = volumeValue;
+             if (collectSound) collectSound.volume = volumeValue;
+             if (missSound) missSound.volume = volumeValue;
+          }
 
-            if (Math.random() < 0.45) {
-              const enemyDiv = document.createElement("div");
-              enemyDiv.classList.add("enemy");
-              const randomCol = Math.floor(Math.random() * cols);
-               if (cells[randomCol] && !cells[randomCol].querySelector('.enemy') && !cells[randomCol].querySelector('.player')) {
+          function playSound(soundElement) {
+              if(soundElement) {
+                  soundElement.currentTime = 0;
+                  // Le volume est appliqué via applyVolume ou l'event listener
+                  soundElement.play().catch(e => {});
+              }
+          }
+
+          function gameLoop() {
+             if(!gameRunning || !gameContainer) return;
+             const cells = gameContainer.querySelectorAll(".cell");
+             if (cells.length === 0) return; // Sécurité
+
+             for (let i = rows * cols - 1; i >= 0; i--) {
+               const currentCell = cells[i];
+               const item = currentCell.querySelector(".enemy");
+
+               if (item) {
+                   const targetIndex = i + cols;
+                   item.remove();
+
+                   if (targetIndex < rows * cols) {
+                        const targetCell = cells[targetIndex];
+                        if (targetIndex >= (rows - 1) * cols && (targetIndex % cols === playerPosition)) {
+                              score += 10;
+                              bottlesCollected++;
+                              if(scoreDisplay) scoreDisplay.textContent = `Score: ${score}`;
+                              if(bottlesDisplay) bottlesDisplay.textContent = `Bouteilles: ${bottlesCollected}`;
+                              playSound(collectSound);
+                              checkRewards();
+                        } else if(targetCell) {
+                             targetCell.appendChild(item);
+                        }
+                   } else {
+                        lives--;
+                        updateLivesDisplay();
+                        playSound(missSound);
+                        if (lives <= 0) {
+                            endGame("Partie Terminée", "Dommage, une bouteille est tombée !");
+                            return;
+                        }
+                   }
+               }
+             }
+
+             if (Math.random() < currentSpawnRate) {
+               const enemyDiv = document.createElement("div");
+               enemyDiv.classList.add("enemy");
+               const randomCol = Math.floor(Math.random() * cols);
+               if (cells[randomCol] && !cells[randomCol].querySelector('.enemy')) {
                     cells[randomCol].appendChild(enemyDiv);
                }
-            }
-          }
+             }
+
+             const now = Date.now();
+             if (gameRunning && lastSpeedIncrease !== 0 && (now - lastSpeedIncrease > speedIncreaseInterval)) {
+                  if (currentGameSpeed > minGameSpeed) {
+                      currentGameSpeed = Math.max(minGameSpeed, currentGameSpeed - speedIncrement);
+                      clearInterval(gameInterval);
+                      gameInterval = setInterval(gameLoop, currentGameSpeed);
+                  }
+                  if (currentSpawnRate < maxSpawnRate) {
+                      currentSpawnRate = Math.min(maxSpawnRate, currentSpawnRate + spawnRateIncrement);
+                  }
+                  lastSpeedIncrease = now;
+             }
+           }
+
 
           function checkRewards() {
             rewards.forEach((reward) => {
-              if (score === reward.points || (score > reward.points && score < reward.points + 10)) {
-                  const alreadyShown = notification.dataset.shownRewards || "";
-                  if(!alreadyShown.includes(reward.points.toString())){
-                      showNotification(reward.message);
-                      notification.dataset.shownRewards = alreadyShown + reward.points + ",";
-                  }
+              if (score >= reward.points && !shownRewards.has(reward.points)) {
+                  showNotification(reward.message);
+                  shownRewards.add(reward.points);
               }
             });
           }
 
           function showNotification(message) {
+            if (!notification) return;
             notification.textContent = message;
             notification.style.display = "block";
+            // Forcer reflow pour que la transition marche
+            void notification.offsetWidth;
             notification.classList.add('show');
             setTimeout(() => {
               notification.classList.remove('show');
@@ -203,33 +324,78 @@
             }, 2700);
           }
 
-         function endGame(message) {
+         function showGameOverPopup(title, message) {
+             if (!gameOverOverlay || !gameOverTitle || !gameOverMessage || !finalScoreDisplay || !finalBottlesDisplay) return;
+             gameOverTitle.textContent = title;
+             gameOverMessage.textContent = message;
+             finalScoreDisplay.textContent = score;
+             finalBottlesDisplay.textContent = bottlesCollected;
+             gameOverOverlay.classList.add('popup-visible');
+         }
+
+         function endGame(title, message) {
              gameRunning = false;
              clearInterval(gameInterval);
              if (backgroundAudio) backgroundAudio.pause();
-             alert(`${message}\nScore final: ${score}\nBouteilles collectées: ${bottlesCollected}`);
-             // Optionnel: Rediriger ou proposer de rejouer
-             // location.reload();
-             // ou ajouter un bouton rejouer
+             showGameOverPopup(title, message);
+             if (gameContainer) gameContainer.classList.remove('playing');
          }
 
+         if (volumeControl) {
+             volumeControl.addEventListener("input", applyVolume);
+         }
 
-          volumeControl.addEventListener("input", (e) => {
-            if (backgroundAudio) {
-                backgroundAudio.volume = parseFloat(e.target.value);
-            }
-          });
+          function startGame() {
+             if (gameRunning) return;
+             // initGame(); // Pas besoin de re-init ici, c'est fait avant
+             if (gameOverlay) gameOverlay.style.display = 'none';
+             if (gameContainer) gameContainer.classList.add('playing');
 
-          function startGameLoop(){
-             gameInterval = setInterval(dropEnemies, 850); // Vitesse du jeu ajustée
+             lastSpeedIncrease = Date.now();
+             currentGameSpeed = baseGameSpeed; // Réinitialiser vitesse
+             currentSpawnRate = initialSpawnRate; // Réinitialiser taux
+
+             // Assurer que la grille est prête avant de lancer la boucle
+             if (gameContainer && gameContainer.children.length > 1) { // Vérifier si les cellules existent (plus que l'overlay)
+                gameInterval = setInterval(gameLoop, currentGameSpeed);
+                gameRunning = true;
+
+                // --- DÉMARRAGE DE LA MUSIQUE ICI ---
+                if (backgroundAudio) {
+                    backgroundAudio.play().then(() => {
+                        console.log("Musique du jeu lancée.");
+                    }).catch(e => {
+                        console.warn("Lecture audio auto bloquée par le navigateur au start. Il faudra peut-être une interaction supplémentaire.");
+                        // On pourrait afficher un message ici si nécessaire
+                    });
+                }
+                // -----------------------------------
+             } else {
+                 console.error("Tentative de démarrage du jeu avant que la grille ne soit prête.");
+             }
+
           }
 
-          createGrid();
-      });
+          if (startGameBtn) {
+             startGameBtn.addEventListener('click', startGame);
+          } else {
+              console.error("Bouton Start Game introuvable");
+          }
 
-      // Placeholder pour le compteur du panier (si besoin de le mettre à jour via JS plus tard)
-      // Pour l'instant, il n'est pas connecté au panier réel du site.
-      // const cartCountPlaceholder = document.getElementById('cart-count-placeholder');
+
+          if (restartGameBtn) {
+              restartGameBtn.addEventListener('click', () => {
+                  if (gameOverOverlay) gameOverOverlay.classList.remove('popup-visible');
+                  initGame(); // Prépare pour un nouveau départ
+              });
+          } else {
+               console.error("Bouton Restart Game introuvable");
+          }
+
+          // Initialiser l'affichage au chargement
+          initGame();
+
+      });
     </script>
 
 </body>
