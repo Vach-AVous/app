@@ -1,3 +1,98 @@
+# La Ferme Connectée - Site E-commerce et Jeu Éducatif
+
+## 1. Introduction
+
+"La Ferme Connectée" est un projet web front-end simulant une plateforme d'e-commerce permettant aux utilisateurs d'acheter des produits directement auprès de producteurs locaux et de participer à un programme unique de "location/parrainage" de vaches. Le projet inclut également une page informative "Notre Histoire" avec un quiz interactif et un mini-jeu de collecte pour engager l'utilisateur sur les thèmes de l'agriculture locale et durable.
+
+Ce projet a été construit en utilisant des technologies web fondamentales (HTML, CSS, JavaScript) sans framework backend, ce qui signifie que toutes les fonctionnalités (panier, commande, jeu) sont **simulées côté client** et ne persistent pas après le rechargement de la page.
+
+## 2. Fonctionnalités Principales
+
+*   **Site E-commerce (Simulation):**
+    *   Affichage dynamique des produits et des vaches à parrainer.
+    *   Système de panier : ajout, suppression d'articles, mise à jour du total et du compteur.
+    *   Formulaire de commande : collecte des informations utilisateur (prénom, nom, adresse, téléphone).
+    *   Validation basique du formulaire.
+    *   **Popup de confirmation de commande** stylisée (remplace l'alerte standard).
+    *   Concept de "Location/Parrainage" de vache intégré au panier.
+*   **Page "Notre Histoire" / À Propos :**
+    *   Contenu textuel présentant le concept et les valeurs.
+    *   Image d'illustration.
+    *   **Quiz Interactif (10 questions) :**
+        *   Affichage des questions une par une (style "carte").
+        *   Navigation Précédent/Suivant.
+        *   Calcul et affichage du score final.
+        *   **Classement simulé** des meilleurs scores.
+        *   **Graphique Chart.js** comparant le score utilisateur au score maximum.
+        *   **Révision des réponses** détaillée après la fin du quiz.
+*   **Jeu "Collecte de Lait":**
+    *   Mini-jeu intégré dans une page dédiée (`game/jeu.html`).
+    *   Contrôle du joueur (camion) avec les flèches du clavier.
+    *   Collecte d'objets (bouteilles de lait) tombant aléatoirement.
+    *   Système de **score** et de **vies**.
+    *   **Difficulté progressive** (augmentation de la vitesse de chute et du taux d'apparition).
+    *   **Récompenses** basées sur le score (bons d'achat simulés) affichées via notifications.
+    *   **Popup de fin de partie** stylisée (Game Over).
+    *   Contrôle du volume pour la musique et les effets sonores du jeu.
+    *   Effets sonores pour la collecte et la perte de vie.
+*   **Fonctionnalités Transverses :**
+    *   **Barre de Navigation** cohérente sur toutes les pages.
+    *   **Popups d'Information Aléatoires :** Messages sur l'écologie, le circuit court, etc., apparaissant à intervalles aléatoires.
+    *   **Musique de Fond (Site Principal) :** Contrôlable via un bouton Play/Pause dans le header. L'état est mémorisé (tentative) via `localStorage`.
+    *   **Favicon** (Logo dans l'onglet).
+    *   **Design "Ferme Familiale Premium"** appliqué sur l'ensemble du site et du jeu.
+    *   Tentative de design responsive pour différentes tailles d'écran.
+
+## 3. Technologies Utilisées
+
+*   **Langages :**
+    *   HTML5 (Structure sémantique)
+    *   CSS3 (Styling, mise en page Flexbox/Grid, variables CSS, transitions, animations, pseudo-éléments)
+    *   JavaScript (ES6+) (Logique client, manipulation du DOM, gestion d'événements, `setTimeout`/`setInterval`, `localStorage`, API Audio HTML5)
+*   **Bibliothèques Externes :**
+    *   **Chart.js** (via CDN) : Pour l'affichage du graphique des résultats du quiz.
+    *   **Google Fonts** (via CDN) : Pour les polices personnalisées (Merriweather, Nunito Sans).
+*   **Outils :**
+    *   Aucun outil de build (Webpack, Vite, etc.) n'est utilisé dans cette version.
+    *   Aucun framework JS (React, Vue, Angular) n'est utilisé.
+
+## 4. Structure du Projet
+
+ferme-connectee/
+├── index.html # Page d'accueil / Boutique
+├── about.html # Page "À Propos" / "Notre Histoire" avec le quiz
+├── style.css # Feuille de style principale (pour tout le site + jeu)
+├── script.js # Script principal (produits, panier, formulaire, popup commande)
+├── about.js # Script pour la page "À Propos" (quiz, classement, graphiques, révision)
+├── popups.js # Script pour les popups d'information aléatoires
+├── music.js # Script pour le contrôle de la musique de fond du site
+├── babylone.mp3 # Fichier audio pour la musique de fond du site
+│
+├── image/ # Dossier pour les images du site principal
+│ ├── logoRond.png # Favicon / Logo utilisé dans le <head>
+│ ├── lait.png # Image produit lait
+│ ├── oeuf.png # Image produit oeufs
+│ ├── chevre.png # Image produit fromage
+│ ├── legume.png # Image produit panier légumes
+│ │
+│ └── vache/ # Sous-dossier pour les images des vaches
+│ ├── vache1.png # Image Marguerite
+│ ├── vache2.png # Image Blanchette
+│ ├── vache3.png # Image Belle
+│ ├── vache4.png # Image Flocon
+│ ├── vache5.png # Image Rosie
+│ └── lolo.png # Image Lola
+│
+└── game/ # Dossier pour le jeu
+├── jeu.html # Fichier HTML du jeu
+│
+└── lib/ # Sous-dossier pour les ressources du jeu
+├── farm-background.jpeg # Image de fond du jeu
+├── camion.png # Image du joueur (camion)
+├── bottle.png # Image de l'objet à collecter (bouteille)
+├── Dulait.mp3 # Musique de fond du jeu
+├── collect.mp3 # Effet sonore collecte
+└── miss.mp3 # Effet sonore bouteille ratée
 
 ## 5. Installation et Lancement
 
