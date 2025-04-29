@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu - La Ferme Connectée</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="icon" type="image/png" href="../images/logo_ferme.png">
+</head>
+<body class="game-page-body">
+
+    <header id="main-header">
+        <div class="header-container">
+            <a href="../index.html" class="logo">La Ferme Connectée</a>
+            <nav class="main-nav">
+                <a href="../index.html#products">Nos Produits</a>
+                <a href="../index.html#rent-a-cow">Louer une Vache</a>
+                <a href="../about.html">Notre Histoire</a>
+                <a href="jeu.html" class="active">Jeu</a>
+                <a href="../index.html#cart">Panier (<span id="cart-count-placeholder">0</span>)</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="game-page-content">
+
+        <div class="game-area">
+            <div class="game-info-header">
+                <div class="score">Score: 0</div>
+                <div class="bottles">Bouteilles: 0</div>
+            </div>
+            <div id="gameContainer" class="game-container">
+            </div>
+        </div>
+
+        <aside class="rewards-sidebar">
+            <h2>Récompenses</h2>
+            <ul class="rewards-list">
+                <li>10000 pts : Bon de 5€</li>
+                <li>20000 pts : Bon de 10€</li>
+                <li>50000 pts : Bon de 25€</li>
+                <li>100000 pts : Bon de 50€</li>
+            </ul>
+            <div class="volume-control">
+                <label for="volume">Volume Jeu :</label>
+                <input id="volume" type="range" min="0" max="1" step="0.01" value="0.5">
+            </div>
+             <p class="game-instructions">Utilisez les flèches ← et → pour déplacer le camion et récupérer les bouteilles !</p>
+        </aside>
+
+    </main>
+
+    <div id="notification" class="game-notification"></div>
+
+    <audio id="backgroundAudio" src="lib/Dulait.mp3" loop></audio>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const gameContainer = document.getElementById("gameContainer");
+          const scoreDisplay = document.querySelector(".score");
+          const bottlesDisplay = document.querySelector(".bottles");
+          const notification = document.getElementById("notification");
+          const volumeControl = document.getElementById("volume");
+          const backgroundAudio = document.getElementById("backgroundAudio");
+          const rows = 6;
+          const cols = 3;
+          let playerPosition = 1;
+          let score = 0;
+          let bottlesCollected = 0;
+          let gameInterval = null;
+          let gameRunning = false;
+
+          const rewards = [
+            { points: 10000, message: "Bravo ! Bon de 5€ gagné !" },
+            { points: 20000, message: "Super ! Bon de 10€ gagné !" },
+            { points: 50000, message: "Incroyable ! Bon de 25€ gagné !" },
+            { points: 100000, message: "Félicitations ! Bon de 50€ gagné !" },
+          ];
+
+          function createGrid() {
+            gameContainer.innerHTML = '';
+            gameContainer.style.setProperty('--grid-rows', rows);
+            gameContainer.style.setProperty('--grid-cols', cols);
+            for (let i = 0; i < rows * cols; i++) {
+              const cell = document.createElement("div");
+              cell.classList.add("cell");
+              gameContainer.appendChild(cell);
+            }
+            updatePlayerPosition();
+            // Essayer de lancer la musique (peut être bloqué par le navigateur)
+            if (backgroundAudio) {
+                backgroundAudio.volume = parseFloat(volumeControl.value); // Appliquer volume initial
+                backgroundAudio.play().catch(e => console.warn("Lecture audio auto bloquée par le navigateur."));
+            }
+             if (!gameRunning) {
+                 startGameLoop();
+                 gameRunning = true;
+             }
+          }
+
+          function updatePlayerPosition() {
+            const cells = document.querySelectorAll(".cell");
+            cells.forEach((cell) => {
+              const player = cell.querySelector(".player");
+              if (player) player.remove();
+            });
+            if(playerPosition >= 0 && playerPosition < cols){
+                 const playerCellIndex = (rows - 1) * cols + playerPosition;
+                 if(playerCellIndex >= 0 && playerCellIndex < cells.length) {
+                     const playerCell = cells[playerCellIndex];
+                     const playerDiv = document.createElement("div");
+                     playerDiv.classList.add("player");
+                     playerCell.appendChild(playerDiv);
+                 }
+            }
+          }
+
+          function movePlayer(direction) {
+             if (direction === "left" && playerPosition > 0) {
+                 playerPosition--;
+             } else if (direction === "right" && playerPosition < cols - 1) {
+                 playerPosition++;
+             }
+             updatePlayerPosition();
+          }
+
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft") {
+                movePlayer("left");
+            } else if (e.key === "ArrowRight") {
+                 movePlayer("right");
+            }
+          });
+
+          function dropEnemies() {
+             if(!gameRunning) return;
+            const cells = document.querySelectorAll(".cell");
+            let gameOver = false;
+
+            for (let i = rows * cols - 1; i >= 0; i--) {
+              const currentCell = cells[i];
+              const enemy = currentCell.querySelector(".enemy");
+
+              if (enemy) {
+                  const targetIndex = i + cols;
+                  enemy.remove();
+
+                  if (targetIndex < rows * cols) {
+                       const targetCell = cells[targetIndex];
+                       if (targetIndex >= (rows - 1) * cols && (targetIndex % cols === playerPosition)) {
+                             score += 10;
+                             bottlesCollected++;
+                             scoreDisplay.textContent = `Score: ${score}`;
+                             bottlesDisplay.textContent = `Bouteilles: ${bottlesCollected}`;
+                             checkRewards();
+                       } else {
+                            targetCell.appendChild(enemy);
+                       }
+                  } else {
+                       gameOver = true;
+                       break;
+                  }
+              }
+            }
+
+            if (gameOver) {
+                 endGame("Perdu ! Une bouteille a touché le sol.");
+                 return;
+            }
+
+            if (Math.random() < 0.45) {
+              const enemyDiv = document.createElement("div");
+              enemyDiv.classList.add("enemy");
+              const randomCol = Math.floor(Math.random() * cols);
+               if (cells[randomCol] && !cells[randomCol].querySelector('.enemy') && !cells[randomCol].querySelector('.player')) {
+                    cells[randomCol].appendChild(enemyDiv);
+               }
+            }
+          }
+
+          function checkRewards() {
+            rewards.forEach((reward) => {
+              if (score === reward.points || (score > reward.points && score < reward.points + 10)) {
+                  const alreadyShown = notification.dataset.shownRewards || "";
+                  if(!alreadyShown.includes(reward.points.toString())){
+                      showNotification(reward.message);
+                      notification.dataset.shownRewards = alreadyShown + reward.points + ",";
+                  }
+              }
+            });
+          }
+
+          function showNotification(message) {
+            notification.textContent = message;
+            notification.style.display = "block";
+            notification.classList.add('show');
+            setTimeout(() => {
+              notification.classList.remove('show');
+              setTimeout(() => { notification.style.display = "none"; }, 300);
+            }, 2700);
+          }
+
+         function endGame(message) {
+             gameRunning = false;
+             clearInterval(gameInterval);
+             if (backgroundAudio) backgroundAudio.pause();
+             alert(`${message}\nScore final: ${score}\nBouteilles collectées: ${bottlesCollected}`);
+             // Optionnel: Rediriger ou proposer de rejouer
+             // location.reload();
+             // ou ajouter un bouton rejouer
+         }
+
+
+          volumeControl.addEventListener("input", (e) => {
+            if (backgroundAudio) {
+                backgroundAudio.volume = parseFloat(e.target.value);
+            }
+          });
+
+          function startGameLoop(){
+             gameInterval = setInterval(dropEnemies, 850); // Vitesse du jeu ajustée
+          }
+
+          createGrid();
+      });
+
+      // Placeholder pour le compteur du panier (si besoin de le mettre à jour via JS plus tard)
+      // Pour l'instant, il n'est pas connecté au panier réel du site.
+      // const cartCountPlaceholder = document.getElementById('cart-count-placeholder');
+    </script>
+
+</body>
+</html>
