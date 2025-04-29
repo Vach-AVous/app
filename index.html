@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Ferme Connectée - Le Goût Authentique</title>
+    <link rel="icon" type="image/png" href="image/logoRond.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">La Ferme Connectée</a>
+            <nav class="main-nav">
+                <a href="index.html#products">Nos Produits</a>
+                <a href="index.html#rent-a-cow">Louer une Vache</a>
+                <a href="about.html">Notre Histoire</a>
+                <a href="index.html#cart">Panier (<span id="cart-count">0</span>)</a>
+            </nav>
+            <button id="toggle-music-btn" class="music-control-btn">♪ Musique</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero">
+            <div class="hero-content">
+                <h1>Le Vrai Goût de la Ferme, chez Vous</h1>
+                <p>Des produits frais et savoureux, cultivés avec passion, livrés en direct.</p>
+                <a href="#products" class="cta-button">Découvrir nos trésors</a>
+            </div>
+        </section>
+
+        <section id="products">
+            <h2>Nos Produits Frais du Jour</h2>
+            <div class="product-list">
+            </div>
+        </section>
+
+        <section id="rent-a-cow">
+            <h2>Adoptez une Vache, Savourez son Lait</h2>
+            <p>Participez à notre aventure et recevez chaque mois une part de sa production.</p>
+            <div class="cow-list">
+            </div>
+        </section>
+
+        <section id="cart">
+            <h2>Votre Panier Gourmand</h2>
+            <ul id="cart-items">
+                <li class="empty-cart">Votre panier est encore vide.</li>
+            </ul>
+            <p class="cart-total">Total : <span id="cart-total-amount">0.00</span> €</p>
+
+            <div id="checkout-form" class="checkout-form" style="display: none;">
+                <h3>Vos Coordonnées pour la Livraison</h3>
+                <form id="customer-info-form">
+                    <div class="form-group">
+                        <label for="firstname">Prénom :</label>
+                        <input type="text" id="firstname" name="firstname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastname">Nom :</label>
+                        <input type="text" id="lastname" name="lastname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Adresse Complète :</label>
+                        <input type="text" id="address" name="address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Téléphone :</label>
+                        <input type="tel" id="phone" name="phone" placeholder="Ex: 0612345678" required>
+                    </div>
+                    <button type="submit" id="confirm-order-btn" class="cta-button">Confirmer la Commande (Simulation)</button>
+                </form>
+            </div>
+
+            <button id="checkout-btn" class="cta-button" disabled>Valider mon Panier</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 La Ferme Connectée - Agriculture locale et passionnée.</p>
+        <p><a href="#">Mentions Légales</a> | <a href="#">Contact</a></p>
+    </footer>
+
+    <audio id="background-music" loop>
+        <source src="babylone.mp3" type="audio/mpeg">
+        Votre navigateur ne supporte pas l'audio.
+    </audio>
+
+    <div id="info-popup-overlay">
+        <div id="info-popup">
+            <h3>Le Saviez-Vous ?</h3>
+            <p id="popup-content">Contenu informatif ici...</p>
+            <button id="close-popup-btn">Bien noté !</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="popups.js" defer></script>
+    <script src="music.js" defer></script>
+</body>
+</html>

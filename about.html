@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notre Histoire - La Ferme Connectée</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="header-container">
+             <a href="index.html" class="logo">La Ferme Connectée</a>
+            <nav class="main-nav">
+                <a href="index.html">Boutique</a>
+                <a href="index.html#products">Nos Produits</a>
+                <a href="index.html#rent-a-cow">Louer une Vache</a>
+                <a href="about.html" class="active">Notre Histoire</a>
+                <a href="index.html#cart">Panier</a>
+            </nav>
+             <button id="toggle-music-btn" class="music-control-btn">♪ Musique</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="about-us">
+             <div class="about-image">
+                 <img src="image/nosValeur.png" alt="Paysage de la ferme" loading="lazy">
+             </div>
+            <div class="about-content">
+                <h2>Notre Histoire, Nos Valeurs</h2>
+                 <p>
+                     La Ferme Connectée est avant tout une histoire de passion : passion pour la terre, pour les animaux, et pour les bons produits. Née du désir de partager le fruit de notre travail et celui de nos amis producteurs locaux, notre plateforme vise à recréer le lien essentiel entre ceux qui produisent et ceux qui savourent.
+                 </p>
+                 <p>
+                     Nous croyons en une agriculture à taille humaine, respectueuse de l'environnement et du bien-être animal. Chaque produit que nous proposons est choisi pour sa qualité, sa fraîcheur et son histoire. En achetant sur La Ferme Connectée, vous ne faites pas qu'une simple course : vous soutenez des familles d'agriculteurs, vous préservez des savoir-faire et vous participez à une économie locale plus juste et durable.
+                 </p>
+                  <p>
+                      L'initiative "Louer une Vache" est notre façon de vous inviter au cœur de la ferme. C'est une opportunité unique de suivre la vie d'un animal, de comprendre son rôle et de bénéficier directement des produits exceptionnels qu'il nous offre. Merci de faire partie de notre communauté !
+                  </p>
+            </div>
+        </section>
+
+        <section id="farm-quiz">
+             <h2>Le Quiz du Fermier Éclairé</h2>
+             <p class="section-subtitle">Que savez-vous de l'agriculture locale ?</p>
+
+            <div id="quiz-container" style="display: none;">
+                <div id="quiz-card">
+                    <div id="quiz-progress">Question X / 10</div>
+                    <p id="quiz-question-text">Texte de la question ici...</p>
+                    <div id="quiz-options">
+                    </div>
+                </div>
+                <div id="quiz-navigation">
+                    <button id="prev-question-btn" class="quiz-nav-btn" disabled>Précédent</button>
+                    <button id="next-question-btn" class="quiz-nav-btn">Suivant</button>
+                </div>
+            </div>
+
+             <button id="start-quiz-btn" class="cta-button">Lancer le Quiz</button>
+
+            <div id="quiz-results" class="quiz-results" style="display: none;">
+            </div>
+
+            <div id="quiz-extras" style="display: none;">
+
+                <div class="leaderboard-section stats-box">
+                    <h3>Classement des Passionnés (Simulation)</h3>
+                    <div id="leaderboard-container">
+                    </div>
+                </div>
+
+                <div class="chart-section stats-box">
+                    <h3>Votre Résultat (Simulation)</h3>
+                    <div id="chart-container">
+                        <canvas id="scoreChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- === NOUVELLE SECTION POUR LA RÉVISION === -->
+                <div id="quiz-review-section" class="stats-box" style="display: none;">
+                    <h3>Révision des Réponses</h3>
+                    <ul id="quiz-review-list">
+                        <!-- La liste des corrections sera générée ici par about.js -->
+                    </ul>
+                </div>
+                <!-- === FIN NOUVELLE SECTION === -->
+
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 La Ferme Connectée - Agriculture locale et passionnée.</p>
+        <p><a href="#">Mentions Légales</a> | <a href="#">Contact</a></p>
+    </footer>
+
+     <audio id="background-music" loop>
+        <source src="audioPrincipale.mp3" type="audio/mpeg">
+        Votre navigateur ne supporte pas l'audio.
+    </audio>
+
+    <div id="info-popup-overlay">
+        <div id="info-popup">
+            <h3>Le Saviez-Vous ?</h3>
+            <p id="popup-content">Contenu informatif ici...</p>
+             <button id="close-popup-btn">Bien noté !</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="about.js"></script>
+    <script src="popups.js" defer></script>
+     <script src="music.js" defer></script>
+</body>
+</html>
